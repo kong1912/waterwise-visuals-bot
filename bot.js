@@ -1,5 +1,5 @@
 const express = require('express');
-const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const fetch = require('node-fetch');
 require("dotenv").config();
 
@@ -25,18 +25,26 @@ client.once('ready', () => {
 });
 
 // Function to send a message to a specific channel
+// Function to send a message to a specific channel
 const sendNotification = async (notification) => {
   try {
     const channel = await client.channels.fetch(CHANNEL_ID);
     if (channel) {
+      // Create an embed for the notification
       const embed = new EmbedBuilder()
         .setColor('#3498db')
         .setTitle(notification.title)
         .setDescription(notification.message)
-        .setFooter({ text: `Notification Type: ${notification.type}` })
-        .setTimestamp(new Date(notification.timestamp));
+        .setFooter({ text: `Notification Type: ${notification.type}` });
 
-      await channel.send({ embeds: [embed] });
+      // Attach the local image file
+      const imageAttachment = new AttachmentBuilder('./kruba.jpeg', { name: 'kruba.jpeg' });
+
+      // Add the attachment as the embed image
+      embed.setImage('attachment://kruba.jpeg');
+
+      // Send the embed with the image attachment
+      await channel.send({ embeds: [embed], files: [imageAttachment] });
       console.log('Notification sent successfully.');
     } else {
       console.error('Channel not found!');
