@@ -68,7 +68,7 @@ const pollNotifications = async () => {
 };
 
 
-setInterval(pollNotifications, 10000);
+setInterval(pollNotifications, 1000);
 
 // Log in to Discord
 client.login(TOKEN);
