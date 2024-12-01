@@ -1,6 +1,7 @@
 const express = require('express');
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const fetch = require('node-fetch');
+require("dotenv").config();
 
 // Initialize Express app
 const app = express();
@@ -12,9 +13,9 @@ const client = new Client({
 });
 
 // Replace 'YOUR_CHANNEL_ID' with the channel ID where notifications will be sent
-const CHANNEL_ID = '1303061838354976849';
-const TOKEN = 'ODk2Njg5MjE1NzkyODgxNzQ1.GFN48X.AfynBwSX7rlLsMTO0yz_Yno37l_YvmEHr24GHs'; // Use environment variables for sensitive information
-const BACKEND_URL = 'https://water-visuals-backend.vercel.app/api/notifications'; // Replace with your backend URL
+const CHANNEL_ID = process.env.CHANNEL_ID;
+const TOKEN = process.env.DISCORD_TOKEN; // Use environment variables for sensitive information
+const BACKEND_URL = process.env.BACKEND_URL; // Replace with your backend URL
 
 // Set to keep track of sent notifications by their ID
 let sentNotifications = new Set();
