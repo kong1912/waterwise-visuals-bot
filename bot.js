@@ -1,6 +1,9 @@
 const express = require('express');
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const fetch = require('node-fetch');
+const axios = require('axios');
+const bodyParser = require('body-parser');
+const { Buffer } = require('buffer');
 require("dotenv").config();
 
 // Initialize Express app
@@ -77,6 +80,45 @@ client.login(TOKEN);
 // Set up a health check route for Vercel
 app.get('/', (req, res) => {
   res.send('Bot is running!');
+});
+
+app.use(bodyParser.json());
+
+app.get('/identify', async (req, res) => {
+    try {
+        // Fetch the image from the provided URL
+        const reqURL = 'https://media.discordapp.net/attachments/1171302901948371024/1312713856681775154/20241201_163547.jpg?ex=674d7f8c&is=674c2e0c&hm=7eae4063c937cf84209769b76aed0a93e5d30746cb1637c3cb69765e03946a5e&=&format=webp&width=496&height=662'
+        // const reqURL = 'https://manatee-steady-immensely.ngrok-free.app/camera'
+        const response = await axios.get(reqURL, { responseType: 'arraybuffer' });
+        const imgBuffer = Buffer.from(response.data, 'binary');
+
+        // Encode the fetched image to base64
+        const encodedImage = imgBuffer.toString('base64');
+
+        // Define the data payload
+        const data = {
+            images: [`data:image/jpg;base64,${encodedImage}`],  // Base64 encoded image
+            similar_images: true  // Optional, whether to find similar images
+        };
+
+        const headers = {
+            'Api-Key': process.env.API_KEY  // Replace with your actual PlantNet API key
+        };
+
+        // Send the POST request to PlantNet API
+        const plantNetResponse = await axios.post('https://plant.id/api/v3/identification', data, { headers });
+        
+        console.log(plantNetResponse.status)
+        // Handle the response
+        if (plantNetResponse.status === 201) {
+            res.json(plantNetResponse.data);
+        } else {
+            res.status(plantNetResponse.status).send(plantNetResponse.statusText);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).send('An error occurred');
+    }
 });
 
 // Start the Express server
