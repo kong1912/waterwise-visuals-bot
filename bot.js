@@ -67,8 +67,8 @@ const pollNotifications = async () => {
   }
 };
 
-// Poll every 10 minutes (600,000 milliseconds)
-setInterval(pollNotifications, 600000);
+
+setInterval(pollNotifications, 10000);
 
 // Log in to Discord
 client.login(TOKEN);
@@ -82,3 +82,5 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Express server running on port ${PORT}`);
 });
+
+module.exports = app;
