@@ -88,7 +88,7 @@ app.get('/', (req, res) => {
   res.send('Bot is running!');
 });
 
-app.use(bodyParser.json());
+
 // Start the Express server
 app.listen(PORT, () => {
   console.log(`Express server running on port ${PORT}`);
