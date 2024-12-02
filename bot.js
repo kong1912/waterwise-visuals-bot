@@ -7,14 +7,14 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
 });
 
-// Replace 'YOUR_CHANNEL_ID' with the channel ID where notifications will be sent
 const CHANNEL_ID = process.env.CHANNEL_ID;
-const TOKEN = process.env.DISCORD_TOKEN; // Use environment variables for sensitive information
-const BACKEND_URL = process.env.BACKEND_URL; // Replace with your backend URL
+const TOKEN = process.env.DISCORD_TOKEN;
+const BACKEND_URL = process.env.BACKEND_URL;
 
 // Maps to track sent notifications
 let sentNotifications = new Set();
 let motionLastTimestamp = null;
+let lastMoistureNotification = null; // Tracks the last moisture-related notification
 
 client.once('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
@@ -25,14 +25,12 @@ const sendNotification = async (notification) => {
   try {
     const channel = await client.channels.fetch(CHANNEL_ID);
     if (channel) {
-      // Create an embed for the notification
       const embed = new EmbedBuilder()
         .setColor('#3498db')
         .setTitle(notification.title)
         .setDescription(notification.message)
         .setFooter({ text: `Notification Type: ${notification.type}` });
 
-      // Send the embed
       await channel.send({ embeds: [embed] });
       console.log(`Notification sent: ${notification.type}`);
     } else {
@@ -63,8 +61,21 @@ const pollNotifications = async () => {
           } else {
             console.log(`Motion detected notification skipped: duplicate timestamp ${notification.timestamp}`);
           }
+        } else if (notification.type === 'moistureLow') {
+          // Handle moistureLow notifications
+          if (lastMoistureNotification !== 'moistureLow') {
+            sendNotification(notification);
+            lastMoistureNotification = 'moistureLow'; // Update the last moisture notification type
+            console.log(`Moisture notification 'moistureLow' sent at ${notification.timestamp}`);
+          } else {
+            console.log(`Moisture notification 'moistureLow' skipped: already sent.`);
+          }
+        } else if (notification.type === 'moistureNormal') {
+          lastMoistureNotification = 'moistureNormal';
+          // Skip moistureNormal notifications entirely
+          console.log(`Moisture notification 'moistureNormal' skipped.`);
         } else {
-          // Handle other notifications based on type
+          // Handle other notifications
           if (!sentNotifications.has(notification.type)) {
             sendNotification(notification);
             sentNotifications.add(notification.type);
@@ -84,4 +95,3 @@ setInterval(pollNotifications, 10000);
 
 // Log in to Discord
 client.login(TOKEN);
-
